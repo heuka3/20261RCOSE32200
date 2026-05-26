@@ -10,7 +10,8 @@ struct MenuBarContentView: View {
             if let session = model.activeSession {
                 Text("\(session.modeName) active")
                 Text(model.remainingText)
-                    .font(.headline)
+                    .font(.system(.title2, design: .monospaced))
+                    .fontWeight(.semibold)
                 Button("Stop Session") {
                     model.stopSession()
                 }
@@ -26,13 +27,24 @@ struct MenuBarContentView: View {
                 }
             }
 
-            HStack {
-                TextField("Minutes", text: $model.customDurationText)
-                    .frame(width: 72)
-                Button("Start") {
-                    model.startSelectedMode(minutes: model.customDurationMinutes())
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Custom duration")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                HStack {
+                    TextField("Minutes", text: $model.customDurationText)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 92)
+                    Button("Start") {
+                        model.startSelectedMode(minutes: model.customDurationMinutes())
+                    }
+                    .keyboardShortcut(.return, modifiers: [])
                 }
             }
+
+            Text("Quick starts")
+                .font(.caption)
+                .foregroundStyle(.secondary)
 
             ForEach(model.selectedMode?.quickStartDurationsMinutes ?? [], id: \.self) { minutes in
                 Button("Start \(minutes) min") {
