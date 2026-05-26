@@ -1,26 +1,73 @@
+import AppKit
 import Foundation
 
 public enum SupportedBrowser: String, CaseIterable, Sendable {
     case safari = "Safari"
     case chrome = "Google Chrome"
+    case dia = "Dia"
+    case edge = "Microsoft Edge"
+    case brave = "Brave Browser"
+    case arc = "Arc"
+    case vivaldi = "Vivaldi"
+    case opera = "Opera"
+
+    public enum ScriptStyle: Sendable {
+        case safari
+        case chromium
+    }
 
     public var displayName: String {
         rawValue
     }
 
-    var urlReadScript: String {
+    public var bundleIdentifiers: [String] {
         switch self {
         case .safari:
+            return ["com.apple.Safari"]
+        case .chrome:
+            return ["com.google.Chrome"]
+        case .dia:
+            return ["company.thebrowser.dia"]
+        case .edge:
+            return ["com.microsoft.edgemac"]
+        case .brave:
+            return ["com.brave.Browser"]
+        case .arc:
+            return ["company.thebrowser.Browser", "company.thebrowser.arc"]
+        case .vivaldi:
+            return ["com.vivaldi.Vivaldi"]
+        case .opera:
+            return ["com.operasoftware.Opera"]
+        }
+    }
+
+    public var scriptStyle: ScriptStyle {
+        switch self {
+        case .safari:
+            return .safari
+        case .chrome, .dia, .edge, .brave, .arc, .vivaldi, .opera:
+            return .chromium
+        }
+    }
+
+    public var isRunning: Bool {
+        let runningBundleIDs = Set(NSWorkspace.shared.runningApplications.compactMap(\.bundleIdentifier))
+        return bundleIdentifiers.contains { runningBundleIDs.contains($0) }
+    }
+
+    public var urlReadScript: String {
+        switch scriptStyle {
+        case .safari:
             return """
-            tell application "Safari"
+            tell application "\(rawValue)"
                 if it is not running then return ""
                 if (count of windows) is 0 then return ""
                 return URL of current tab of front window
             end tell
             """
-        case .chrome:
+        case .chromium:
             return """
-            tell application "Google Chrome"
+            tell application "\(rawValue)"
                 if it is not running then return ""
                 if (count of windows) is 0 then return ""
                 return URL of active tab of front window
@@ -29,20 +76,20 @@ public enum SupportedBrowser: String, CaseIterable, Sendable {
         }
     }
 
-    func navigateScript(to url: String) -> String {
+    public func navigateScript(to url: String) -> String {
         let escaped = url.replacingOccurrences(of: "\"", with: "\\\"")
-        switch self {
+        switch scriptStyle {
         case .safari:
             return """
-            tell application "Safari"
+            tell application "\(rawValue)"
                 if it is not running then return
                 if (count of windows) is 0 then return
                 set URL of current tab of front window to "\(escaped)"
             end tell
             """
-        case .chrome:
+        case .chromium:
             return """
-            tell application "Google Chrome"
+            tell application "\(rawValue)"
                 if it is not running then return
                 if (count of windows) is 0 then return
                 set URL of active tab of front window to "\(escaped)"
@@ -65,6 +112,8 @@ public final class BrowserBlockingEngine {
         guard !mode.websiteRules.isEmpty else { return [] }
 
         return SupportedBrowser.allCases.compactMap { browser in
+            guard browser.isRunning else { return nil }
+
             do {
                 let url = try currentURL(in: browser)
                 guard let url, let rule = RuleMatcher.matchingRule(for: url, rules: mode.websiteRules) else {

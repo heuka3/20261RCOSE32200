@@ -60,6 +60,15 @@ func runChecks() throws {
     try store.saveModes(modes)
     let loaded = try store.loadModes()
     try expect(loaded == modes, "Mode store should round-trip modes.")
+
+    let diaReadScript = SupportedBrowser.dia.urlReadScript
+    try expect(diaReadScript.contains("tell application \"Dia\""), "Dia script should target Dia.")
+    try expect(diaReadScript.contains("active tab of front window"), "Dia should use Chromium-style active tab access.")
+    try expect(diaReadScript.contains("return URL"), "Dia read script should read the active tab URL.")
+
+    let diaNavigateScript = SupportedBrowser.dia.navigateScript(to: "https://example.com")
+    try expect(diaNavigateScript.contains("set URL of active tab of front window"), "Dia navigate script should update the active tab URL.")
+    try expect(diaNavigateScript.contains("https://example.com"), "Dia navigate script should include the target URL.")
 }
 
 do {
