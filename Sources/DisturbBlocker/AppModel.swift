@@ -12,11 +12,13 @@ final class AppModel: ObservableObject {
     @Published var customDurationText = "50"
     @Published var permissions = PermissionReader.snapshot()
     @Published var isDryRun = false
+    @Published private var now = Date()
 
     private let store: any ModeStoring
     private var blockingCoordinator = BlockingCoordinator()
     private var enforcementTimer: Timer?
     private var scheduleTimer: Timer?
+    private var uiTimer: Timer?
     private var triggeredSchedules = Set<ScheduleTrigger>()
 
     init(store: any ModeStoring = UserDefaultsModeStore()) {
@@ -41,7 +43,7 @@ final class AppModel: ObservableObject {
 
     var remainingText: String {
         guard let activeSession else { return "Inactive" }
-        let seconds = activeSession.remainingSeconds()
+        let seconds = activeSession.remainingSeconds(at: now)
         return String(format: "%02d:%02d", seconds / 60, seconds % 60)
     }
 
@@ -134,6 +136,9 @@ final class AppModel: ObservableObject {
     }
 
     private func startTimers() {
+        uiTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            Task { @MainActor in self?.updateClock() }
+        }
         enforcementTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.tick() }
         }
@@ -142,7 +147,12 @@ final class AppModel: ObservableObject {
         }
     }
 
+    private func updateClock() {
+        now = Date()
+    }
+
     private func tick() {
+        updateClock()
         refreshPermissions()
         guard let activeSession else { return }
         if !activeSession.isActive() {
