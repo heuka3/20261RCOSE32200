@@ -30,15 +30,6 @@ public final class UserDefaultsModeStore: ModeStoring {
     }
 
     public static var defaultModes: [BlockMode] {
-        [
-            BlockMode(
-                name: "Work",
-                websiteRules: [
-                    WebsiteRule(contains: "youtube"),
-                    WebsiteRule(contains: "reddit")
-                ],
-                defaultDurationMinutes: 50
-            )
-        ]
+        []
     }
 }

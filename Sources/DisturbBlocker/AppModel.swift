@@ -9,7 +9,7 @@ final class AppModel: ObservableObject {
     @Published var selectedModeID: UUID?
     @Published var activeSession: ActiveSession?
     @Published var events: [BlockEvent] = []
-    @Published var customDurationText = "50"
+    @Published var customDurationText = ""
     @Published var permissions = PermissionReader.snapshot()
     @Published var isDryRun = false
     @Published private var now = Date()
@@ -52,7 +52,7 @@ final class AppModel: ObservableObject {
             modes = try store.loadModes()
             selectedModeID = modes.first?.id
         } catch {
-            modes = UserDefaultsModeStore.defaultModes
+            modes = []
             log(.init(kind: .debug, target: "Store", message: "Failed to load modes: \(error.localizedDescription)", succeeded: false))
         }
     }

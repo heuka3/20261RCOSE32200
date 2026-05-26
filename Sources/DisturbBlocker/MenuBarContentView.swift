@@ -35,6 +35,8 @@ struct MenuBarContentView: View {
                     TextField("Minutes", text: $model.customDurationText)
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 92)
+                    Text("min")
+                        .foregroundStyle(.secondary)
                     Button("Start") {
                         model.startSelectedMode(minutes: model.customDurationMinutes())
                     }
@@ -51,11 +53,6 @@ struct MenuBarContentView: View {
                     model.startSelectedMode(minutes: minutes)
                 }
             }
-
-            Button("Start Default (\(model.selectedMode?.defaultDurationMinutes ?? 50) min)") {
-                model.startSelectedMode()
-            }
-
             Divider()
 
             Button("Settings...") {

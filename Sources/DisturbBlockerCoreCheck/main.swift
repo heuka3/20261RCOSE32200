@@ -56,6 +56,8 @@ func runChecks() throws {
     let suite = UserDefaults(suiteName: suiteName)!
     defer { suite.removePersistentDomain(forName: suiteName) }
     let store = UserDefaultsModeStore(defaults: suite, key: "modes")
+    let freshModes = try store.loadModes()
+    try expect(freshModes == [], "A fresh install should start with no default modes.")
     let modes = [BlockMode(name: "Study", websiteRules: [WebsiteRule(contains: "news")])]
     try store.saveModes(modes)
     let loaded = try store.loadModes()
