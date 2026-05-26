@@ -2,7 +2,7 @@ import DisturbBlockerCore
 import SwiftUI
 
 struct MenuBarContentView: View {
-    @EnvironmentObject private var model: AppModel
+    @ObservedObject var model: AppModel
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
@@ -55,6 +55,7 @@ struct MenuBarContentView: View {
                 NSApp.terminate(nil)
             }
         }
-        .padding(.vertical, 4)
+        .padding(14)
+        .frame(width: 260)
     }
 }

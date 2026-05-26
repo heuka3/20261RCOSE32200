@@ -6,12 +6,11 @@ struct DisturbBlockerApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            MenuBarContentView()
-                .environmentObject(model)
+            MenuBarContentView(model: model)
         } label: {
             Label(model.activeSession == nil ? "Disturb Blocker" : model.remainingText, systemImage: model.activeSession == nil ? "moon" : "timer")
         }
-        .menuBarExtraStyle(.menu)
+        .menuBarExtraStyle(.window)
 
         Window("Disturb Blocker Settings", id: "settings") {
             SettingsView()
