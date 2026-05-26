@@ -253,7 +253,7 @@ struct ScheduleRow: View {
             ), in: 0...59)
             Stepper("\(schedule.durationMinutes) min", value: Binding(
                 get: { schedule.durationMinutes },
-                set: { update { $0.durationMinutes = max(1, value) } }
+                set: { newValue in update { $0.durationMinutes = max(1, newValue) } }
             ), in: 1...600)
             Button {
                 model.updateSelectedMode { $0.schedules.removeAll { $0.id == schedule.id } }

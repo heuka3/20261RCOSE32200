@@ -13,13 +13,13 @@ final class AppModel: ObservableObject {
     @Published var permissions = PermissionReader.snapshot()
     @Published var isDryRun = false
 
-    private let store: ModeStoring
+    private let store: any ModeStoring
     private var blockingCoordinator = BlockingCoordinator()
     private var enforcementTimer: Timer?
     private var scheduleTimer: Timer?
     private var triggeredSchedules = Set<ScheduleTrigger>()
 
-    init(store: ModeStoring = UserDefaultsModeStore()) {
+    init(store: any ModeStoring = UserDefaultsModeStore()) {
         self.store = store
         load()
         startTimers()
