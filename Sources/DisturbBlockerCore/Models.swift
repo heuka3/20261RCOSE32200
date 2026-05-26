@@ -30,11 +30,15 @@ public struct BlockMode: Identifiable, Codable, Equatable, Sendable {
     public static let defaultQuickStartDurationsMinutes = [25, 50, 90]
 
     public static func normalizedQuickStartDurations(_ durations: [Int]) -> [Int] {
-        let normalized = durations
+        let normalized = sanitizedQuickStartDurations(durations)
+        return normalized.isEmpty ? defaultQuickStartDurationsMinutes : normalized
+    }
+
+    public static func sanitizedQuickStartDurations(_ durations: [Int]) -> [Int] {
+        durations
             .map { min(600, max(1, $0)) }
             .uniqued()
             .sorted()
-        return normalized.isEmpty ? defaultQuickStartDurationsMinutes : normalized
     }
 
     private enum CodingKeys: String, CodingKey {

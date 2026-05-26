@@ -70,6 +70,13 @@ final class AppModel: ObservableObject {
         start(mode: mode, minutes: minutes ?? mode.defaultDurationMinutes, source: source)
     }
 
+    func customDurationMinutes() -> Int {
+        guard let minutes = Int(customDurationText.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+            return selectedMode?.defaultDurationMinutes ?? 50
+        }
+        return max(1, minutes)
+    }
+
     func start(mode: BlockMode, minutes: Int, source: ActiveSession.Source) {
         let now = Date()
         activeSession = ActiveSession(

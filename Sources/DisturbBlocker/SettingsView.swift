@@ -67,6 +67,10 @@ struct ModeEditorView: View {
                         }
                     }
                     GridRow {
+                        Text("Quick starts")
+                        QuickStartDurationsEditor(mode: mode)
+                    }
+                    GridRow {
                         Text("Debug")
                         Toggle("Dry run", isOn: $model.isDryRun)
                     }
@@ -97,6 +101,59 @@ struct ModeEditorView: View {
                 EventList(events: model.events)
             }
             .padding(24)
+        }
+    }
+}
+
+struct QuickStartDurationsEditor: View {
+    @EnvironmentObject private var model: AppModel
+    let mode: BlockMode
+
+    @State private var newDurationText = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(mode.quickStartDurationsMinutes, id: \.self) { duration in
+                HStack {
+                    Stepper(value: Binding(
+                        get: { duration },
+                        set: { newValue in replace(duration, with: newValue) }
+                    ), in: 1...600) {
+                        Text("\(duration) minutes")
+                    }
+
+                    Button {
+                        model.updateSelectedMode {
+                            $0.quickStartDurationsMinutes.removeAll { $0 == duration }
+                            $0.quickStartDurationsMinutes = BlockMode.sanitizedQuickStartDurations($0.quickStartDurationsMinutes)
+                        }
+                    } label: {
+                        Label("Remove", systemImage: "minus.circle")
+                    }
+                }
+            }
+
+            HStack {
+                TextField("Minutes", text: $newDurationText)
+                    .frame(width: 100)
+                Button {
+                    guard let minutes = Int(newDurationText.trimmingCharacters(in: .whitespacesAndNewlines)) else { return }
+                    model.updateSelectedMode {
+                        $0.quickStartDurationsMinutes = BlockMode.sanitizedQuickStartDurations($0.quickStartDurationsMinutes + [minutes])
+                    }
+                    newDurationText = ""
+                } label: {
+                    Label("Add", systemImage: "plus")
+                }
+            }
+        }
+    }
+
+    private func replace(_ oldDuration: Int, with newDuration: Int) {
+        model.updateSelectedMode {
+            $0.quickStartDurationsMinutes = BlockMode.sanitizedQuickStartDurations(
+                $0.quickStartDurationsMinutes.map { $0 == oldDuration ? newDuration : $0 }
+            )
         }
     }
 }

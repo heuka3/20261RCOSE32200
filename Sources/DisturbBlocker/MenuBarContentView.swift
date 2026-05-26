@@ -26,16 +26,22 @@ struct MenuBarContentView: View {
                 }
             }
 
-            Button("Start 25 min") { model.startSelectedMode(minutes: 25) }
-            Button("Start 50 min") { model.startSelectedMode(minutes: 50) }
-            Button("Start 90 min") { model.startSelectedMode(minutes: 90) }
-
             HStack {
                 TextField("Minutes", text: $model.customDurationText)
                     .frame(width: 72)
                 Button("Start") {
-                    model.startSelectedMode(minutes: Int(model.customDurationText) ?? model.selectedMode?.defaultDurationMinutes ?? 50)
+                    model.startSelectedMode(minutes: model.customDurationMinutes())
                 }
+            }
+
+            ForEach(model.selectedMode?.quickStartDurationsMinutes ?? [], id: \.self) { minutes in
+                Button("Start \(minutes) min") {
+                    model.startSelectedMode(minutes: minutes)
+                }
+            }
+
+            Button("Start Default (\(model.selectedMode?.defaultDurationMinutes ?? 50) min)") {
+                model.startSelectedMode()
             }
 
             Divider()
