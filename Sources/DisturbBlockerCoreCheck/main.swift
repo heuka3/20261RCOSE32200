@@ -61,6 +61,19 @@ func runChecks() throws {
     let loaded = try store.loadModes()
     try expect(loaded == modes, "Mode store should round-trip modes.")
 
+    let legacyModeJSON = """
+    [{
+        "id": "\(UUID().uuidString)",
+        "name": "Legacy",
+        "blockedApps": [],
+        "websiteRules": [],
+        "defaultDurationMinutes": 50,
+        "schedules": []
+    }]
+    """.data(using: .utf8)!
+    let legacyModes = try JSONDecoder().decode([BlockMode].self, from: legacyModeJSON)
+    try expect(legacyModes.first?.quickStartDurationsMinutes == [25, 50, 90], "Legacy modes should receive default quick start durations.")
+
     let diaReadScript = SupportedBrowser.dia.urlReadScript
     try expect(diaReadScript.contains("tell application \"Dia\""), "Dia script should target Dia.")
     try expect(diaReadScript.contains("active tab of front window"), "Dia should use Chromium-style active tab access.")

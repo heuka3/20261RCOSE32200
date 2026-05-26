@@ -6,6 +6,7 @@ public struct BlockMode: Identifiable, Codable, Equatable, Sendable {
     public var blockedApps: [BlockedApp]
     public var websiteRules: [WebsiteRule]
     public var defaultDurationMinutes: Int
+    public var quickStartDurationsMinutes: [Int]
     public var schedules: [BlockSchedule]
 
     public init(
@@ -14,6 +15,7 @@ public struct BlockMode: Identifiable, Codable, Equatable, Sendable {
         blockedApps: [BlockedApp] = [],
         websiteRules: [WebsiteRule] = [],
         defaultDurationMinutes: Int = 50,
+        quickStartDurationsMinutes: [Int] = Self.defaultQuickStartDurationsMinutes,
         schedules: [BlockSchedule] = []
     ) {
         self.id = id
@@ -21,7 +23,48 @@ public struct BlockMode: Identifiable, Codable, Equatable, Sendable {
         self.blockedApps = blockedApps
         self.websiteRules = websiteRules
         self.defaultDurationMinutes = defaultDurationMinutes
+        self.quickStartDurationsMinutes = Self.normalizedQuickStartDurations(quickStartDurationsMinutes)
         self.schedules = schedules
+    }
+
+    public static let defaultQuickStartDurationsMinutes = [25, 50, 90]
+
+    public static func normalizedQuickStartDurations(_ durations: [Int]) -> [Int] {
+        let normalized = durations
+            .map { min(600, max(1, $0)) }
+            .uniqued()
+            .sorted()
+        return normalized.isEmpty ? defaultQuickStartDurationsMinutes : normalized
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case blockedApps
+        case websiteRules
+        case defaultDurationMinutes
+        case quickStartDurationsMinutes
+        case schedules
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        blockedApps = try container.decodeIfPresent([BlockedApp].self, forKey: .blockedApps) ?? []
+        websiteRules = try container.decodeIfPresent([WebsiteRule].self, forKey: .websiteRules) ?? []
+        defaultDurationMinutes = try container.decodeIfPresent(Int.self, forKey: .defaultDurationMinutes) ?? 50
+        quickStartDurationsMinutes = Self.normalizedQuickStartDurations(
+            try container.decodeIfPresent([Int].self, forKey: .quickStartDurationsMinutes) ?? Self.defaultQuickStartDurationsMinutes
+        )
+        schedules = try container.decodeIfPresent([BlockSchedule].self, forKey: .schedules) ?? []
+    }
+}
+
+private extension Array where Element: Hashable {
+    func uniqued() -> [Element] {
+        var seen = Set<Element>()
+        return filter { seen.insert($0).inserted }
     }
 }
 
