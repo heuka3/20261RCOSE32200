@@ -58,15 +58,6 @@ struct ModeEditorView: View {
                         ))
                     }
                     GridRow {
-                        Text("Default duration")
-                        Stepper(value: Binding(
-                            get: { mode.defaultDurationMinutes },
-                            set: { value in model.updateSelectedMode { $0.defaultDurationMinutes = value } }
-                        ), in: 1...600) {
-                            Text("\(mode.defaultDurationMinutes) minutes")
-                        }
-                    }
-                    GridRow {
                         Text("Quick starts")
                         QuickStartDurationsEditor(mode: mode)
                     }
@@ -275,7 +266,8 @@ struct EditableSchedulesList: View {
         VStack(alignment: .leading, spacing: 12) {
             Button {
                 model.updateSelectedMode {
-                    $0.schedules.append(BlockSchedule(weekdays: [2, 3, 4, 5, 6], hour: 9, minute: 0, durationMinutes: $0.defaultDurationMinutes))
+                    let duration = $0.quickStartDurationsMinutes.first ?? 50
+                    $0.schedules.append(BlockSchedule(weekdays: [2, 3, 4, 5, 6], hour: 9, minute: 0, durationMinutes: duration))
                 }
             } label: {
                 Label("Add Weekday Schedule", systemImage: "calendar.badge.plus")

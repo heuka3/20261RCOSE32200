@@ -38,9 +38,11 @@ struct MenuBarContentView: View {
                     Text("min")
                         .foregroundStyle(.secondary)
                     Button("Start") {
-                        model.startSelectedMode(minutes: model.customDurationMinutes())
+                        guard let minutes = model.customDurationMinutes() else { return }
+                        model.startSelectedMode(minutes: minutes)
                     }
                     .keyboardShortcut(.return, modifiers: [])
+                    .disabled(model.customDurationMinutes() == nil || model.selectedMode == nil)
                 }
             }
 
