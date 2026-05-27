@@ -42,7 +42,7 @@ struct MenuBarContentView: View {
                                 set: { model.setCustomDurationText($0) }
                             ))
                                 .textFieldStyle(.roundedBorder)
-                                .frame(width: 86)
+                                .frame(width: 74)
                             Text("min")
                                 .foregroundStyle(.secondary)
                                 .frame(width: 28, alignment: .leading)
@@ -58,12 +58,26 @@ struct MenuBarContentView: View {
                         Text("Until")
                             .foregroundStyle(.secondary)
                             .frame(width: 44, alignment: .leading)
-                        DatePicker("", selection: Binding(
-                            get: { model.customEndTime },
-                            set: { model.setCustomEndTime($0) }
-                        ), displayedComponents: .hourAndMinute)
-                        .labelsHidden()
-                        .frame(width: 146, alignment: .leading)
+                        HStack(spacing: 6) {
+                            TextField("HH", text: Binding(
+                                get: { model.customEndHourText },
+                                set: { model.setCustomEndHourText($0) }
+                            ))
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 50)
+                            Text(":")
+                                .foregroundStyle(.secondary)
+                            TextField("MM", text: Binding(
+                                get: { model.customEndMinuteText },
+                                set: { model.setCustomEndMinuteText($0) }
+                            ))
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 50)
+                            Text(model.customEndTimeText)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .frame(width: 44, alignment: .leading)
+                        }
                     }
                 }
                 Text(model.customDurationSummaryText)
