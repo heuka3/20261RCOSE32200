@@ -32,7 +32,10 @@ struct MenuBarContentView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 HStack {
-                    TextField("Minutes", text: $model.customDurationText)
+                    TextField("Minutes", text: Binding(
+                        get: { model.customDurationText },
+                        set: { model.setCustomDurationText($0) }
+                    ))
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 92)
                     Text("min")
@@ -44,6 +47,18 @@ struct MenuBarContentView: View {
                     .keyboardShortcut(.return, modifiers: [])
                     .disabled(model.customDurationMinutes() == nil || model.selectedMode == nil)
                 }
+                HStack {
+                    Text("Until")
+                        .foregroundStyle(.secondary)
+                    DatePicker("", selection: Binding(
+                        get: { model.customEndTime },
+                        set: { model.setCustomEndTime($0) }
+                    ), displayedComponents: .hourAndMinute)
+                    .labelsHidden()
+                }
+                Text(model.customDurationSummaryText)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Text("Quick starts")

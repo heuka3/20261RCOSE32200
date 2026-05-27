@@ -10,6 +10,7 @@ final class AppModel: ObservableObject {
     @Published var activeSession: ActiveSession?
     @Published var events: [BlockEvent] = []
     @Published var customDurationText = ""
+    @Published var customEndTime = Date().addingTimeInterval(25 * 60)
     @Published var permissions = PermissionReader.snapshot()
     @Published var isDryRun = false
     @Published private var now = Date()
@@ -20,6 +21,7 @@ final class AppModel: ObservableObject {
     private var scheduleTimer: Timer?
     private var uiTimer: Timer?
     private var triggeredSchedules = Set<ScheduleTrigger>()
+    private var customDurationInputMode: CustomDurationInputMode = .minutes
 
     init(store: any ModeStoring = UserDefaultsModeStore()) {
         self.store = store
@@ -45,6 +47,15 @@ final class AppModel: ObservableObject {
         guard let activeSession else { return "Inactive" }
         let seconds = activeSession.remainingSeconds(at: now)
         return String(format: "%02d:%02d", seconds / 60, seconds % 60)
+    }
+
+    var customEndTimeText: String {
+        Self.timeFormatter.string(from: customEndTime)
+    }
+
+    var customDurationSummaryText: String {
+        guard let minutes = customDurationMinutes() else { return "Enter minutes or pick an end time" }
+        return "\(minutes) min until \(customEndTimeText)"
     }
 
     func load() {
@@ -75,6 +86,20 @@ final class AppModel: ObservableObject {
             return nil
         }
         return max(1, minutes)
+    }
+
+    func setCustomDurationText(_ text: String) {
+        customDurationInputMode = .minutes
+        customDurationText = text
+        guard let minutes = customDurationMinutes() else { return }
+        customEndTime = now.addingTimeInterval(TimeInterval(minutes * 60))
+    }
+
+    func setCustomEndTime(_ date: Date) {
+        customDurationInputMode = .endTime
+        let resolvedEndTime = resolvedFutureTime(matchingTimeOfDay: date)
+        customEndTime = resolvedEndTime
+        syncDurationTextFromEndTime()
     }
 
     func start(mode: BlockMode, minutes: Int, source: ActiveSession.Source) {
@@ -156,6 +181,44 @@ final class AppModel: ObservableObject {
 
     private func updateClock() {
         now = Date()
+        if customDurationInputMode == .endTime {
+            syncDurationTextFromEndTime()
+        }
+    }
+
+    private func syncDurationTextFromEndTime() {
+        let seconds = max(60, customEndTime.timeIntervalSince(now))
+        let minutes = Int(ceil(seconds / 60))
+        customDurationText = "\(minutes)"
+    }
+
+    private func resolvedFutureTime(matchingTimeOfDay date: Date) -> Date {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.hour, .minute], from: date)
+        var resolved = calendar.nextDate(
+            after: now.addingTimeInterval(-1),
+            matching: components,
+            matchingPolicy: .nextTime,
+            repeatedTimePolicy: .first,
+            direction: .forward
+        ) ?? date
+
+        if resolved <= now {
+            resolved = calendar.date(byAdding: .day, value: 1, to: resolved) ?? resolved.addingTimeInterval(24 * 60 * 60)
+        }
+
+        return resolved
+    }
+
+    private static let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter
+    }()
+
+    private enum CustomDurationInputMode {
+        case minutes
+        case endTime
     }
 
     private func tick() {
