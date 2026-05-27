@@ -27,11 +27,10 @@ public struct BlockMode: Identifiable, Codable, Equatable, Sendable {
         self.schedules = schedules
     }
 
-    public static let defaultQuickStartDurationsMinutes = [25, 50, 90]
+    public static let defaultQuickStartDurationsMinutes: [Int] = []
 
     public static func normalizedQuickStartDurations(_ durations: [Int]) -> [Int] {
-        let normalized = sanitizedQuickStartDurations(durations)
-        return normalized.isEmpty ? defaultQuickStartDurationsMinutes : normalized
+        sanitizedQuickStartDurations(durations)
     }
 
     public static func sanitizedQuickStartDurations(_ durations: [Int]) -> [Int] {

@@ -74,7 +74,7 @@ func runChecks() throws {
     }]
     """.data(using: .utf8)!
     let legacyModes = try JSONDecoder().decode([BlockMode].self, from: legacyModeJSON)
-    try expect(legacyModes.first?.quickStartDurationsMinutes == [25, 50, 90], "Legacy modes should receive default quick start durations.")
+    try expect(legacyModes.first?.quickStartDurationsMinutes == [], "Legacy modes should not receive default quick start durations.")
 
     let diaReadScript = SupportedBrowser.dia.urlReadScript
     try expect(diaReadScript.contains("tell application \"Dia\""), "Dia script should target Dia.")
