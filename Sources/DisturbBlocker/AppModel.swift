@@ -11,8 +11,6 @@ final class AppModel: ObservableObject {
     @Published var events: [BlockEvent] = []
     @Published var customDurationText = ""
     @Published var customEndTime = Date().addingTimeInterval(25 * 60)
-    @Published var customEndHourText = ""
-    @Published var customEndMinuteText = ""
     @Published var permissions = PermissionReader.snapshot()
     @Published var isDryRun = false
     @Published private var now = Date()
@@ -28,7 +26,6 @@ final class AppModel: ObservableObject {
     init(store: any ModeStoring = UserDefaultsModeStore()) {
         self.store = store
         load()
-        syncEndTimeTextFromDate()
         startTimers()
     }
 
@@ -96,27 +93,13 @@ final class AppModel: ObservableObject {
         customDurationText = text
         guard let minutes = customDurationMinutes() else { return }
         customEndTime = now.addingTimeInterval(TimeInterval(minutes * 60))
-        syncEndTimeTextFromDate()
     }
 
     func setCustomEndTime(_ date: Date) {
         customDurationInputMode = .endTime
         let resolvedEndTime = resolvedFutureTime(matchingTimeOfDay: date)
         customEndTime = resolvedEndTime
-        syncEndTimeTextFromDate()
         syncDurationTextFromEndTime()
-    }
-
-    func setCustomEndHourText(_ text: String) {
-        customDurationInputMode = .endTime
-        customEndHourText = text
-        updateCustomEndTimeFromText()
-    }
-
-    func setCustomEndMinuteText(_ text: String) {
-        customDurationInputMode = .endTime
-        customEndMinuteText = text
-        updateCustomEndTimeFromText()
     }
 
     func start(mode: BlockMode, minutes: Int, source: ActiveSession.Source) {
@@ -207,23 +190,6 @@ final class AppModel: ObservableObject {
         let seconds = max(60, customEndTime.timeIntervalSince(now))
         let minutes = Int(ceil(seconds / 60))
         customDurationText = "\(minutes)"
-    }
-
-    private func syncEndTimeTextFromDate() {
-        let calendar = Calendar.current
-        customEndHourText = String(format: "%02d", calendar.component(.hour, from: customEndTime))
-        customEndMinuteText = String(format: "%02d", calendar.component(.minute, from: customEndTime))
-    }
-
-    private func updateCustomEndTimeFromText() {
-        guard let hour = Int(customEndHourText.trimmingCharacters(in: .whitespacesAndNewlines)),
-              let minute = Int(customEndMinuteText.trimmingCharacters(in: .whitespacesAndNewlines))
-        else {
-            return
-        }
-
-        customEndTime = resolvedFutureTime(hour: min(23, max(0, hour)), minute: min(59, max(0, minute)))
-        syncDurationTextFromEndTime()
     }
 
     private func resolvedFutureTime(matchingTimeOfDay date: Date) -> Date {

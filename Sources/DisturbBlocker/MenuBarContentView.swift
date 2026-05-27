@@ -31,54 +31,38 @@ struct MenuBarContentView: View {
                 Text("Custom duration")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 8) {
-                    GridRow {
-                        Text("For")
-                            .foregroundStyle(.secondary)
-                            .frame(width: 44, alignment: .leading)
-                        HStack(spacing: 8) {
-                            TextField("Minutes", text: Binding(
-                                get: { model.customDurationText },
-                                set: { model.setCustomDurationText($0) }
-                            ))
-                                .textFieldStyle(.roundedBorder)
-                                .frame(width: 74)
-                            Text("min")
-                                .foregroundStyle(.secondary)
-                                .frame(width: 28, alignment: .leading)
-                            Button("Start") {
-                                guard let minutes = model.customDurationMinutes() else { return }
-                                model.startSelectedMode(minutes: minutes)
-                            }
-                            .keyboardShortcut(.return, modifiers: [])
-                            .disabled(model.customDurationMinutes() == nil || model.selectedMode == nil)
-                        }
+                HStack(spacing: 8) {
+                    Text("For")
+                        .foregroundStyle(.secondary)
+                        .frame(width: 44, alignment: .leading)
+                    TextField("Minutes", text: Binding(
+                        get: { model.customDurationText },
+                        set: { model.setCustomDurationText($0) }
+                    ))
+                    .textFieldStyle(.roundedBorder)
+                    .frame(width: 84)
+                    Text("min")
+                        .foregroundStyle(.secondary)
+                        .frame(width: 28, alignment: .leading)
+                    Button("Start") {
+                        guard let minutes = model.customDurationMinutes() else { return }
+                        model.startSelectedMode(minutes: minutes)
                     }
-                    GridRow {
-                        Text("Until")
-                            .foregroundStyle(.secondary)
-                            .frame(width: 44, alignment: .leading)
-                        HStack(spacing: 6) {
-                            TextField("HH", text: Binding(
-                                get: { model.customEndHourText },
-                                set: { model.setCustomEndHourText($0) }
-                            ))
-                            .textFieldStyle(.roundedBorder)
-                            .frame(width: 50)
-                            Text(":")
-                                .foregroundStyle(.secondary)
-                            TextField("MM", text: Binding(
-                                get: { model.customEndMinuteText },
-                                set: { model.setCustomEndMinuteText($0) }
-                            ))
-                            .textFieldStyle(.roundedBorder)
-                            .frame(width: 50)
-                            Text(model.customEndTimeText)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .frame(width: 44, alignment: .leading)
-                        }
-                    }
+                    .keyboardShortcut(.return, modifiers: [])
+                    .disabled(model.customDurationMinutes() == nil || model.selectedMode == nil)
+                }
+
+                HStack(spacing: 8) {
+                    Text("Until")
+                        .foregroundStyle(.secondary)
+                        .frame(width: 44, alignment: .leading)
+                    DatePicker("", selection: Binding(
+                        get: { model.customEndTime },
+                        set: { model.setCustomEndTime($0) }
+                    ), displayedComponents: .hourAndMinute)
+                    .labelsHidden()
+                    .datePickerStyle(.compact)
+                    .frame(minWidth: 132, alignment: .leading)
                 }
                 Text(model.customDurationSummaryText)
                     .font(.caption)
@@ -106,6 +90,6 @@ struct MenuBarContentView: View {
             }
         }
         .padding(14)
-        .frame(width: 310)
+        .frame(width: 330)
     }
 }
