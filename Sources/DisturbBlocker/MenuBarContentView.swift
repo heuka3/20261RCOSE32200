@@ -31,30 +31,40 @@ struct MenuBarContentView: View {
                 Text("Custom duration")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                HStack {
-                    TextField("Minutes", text: Binding(
-                        get: { model.customDurationText },
-                        set: { model.setCustomDurationText($0) }
-                    ))
-                        .textFieldStyle(.roundedBorder)
-                        .frame(width: 92)
-                    Text("min")
-                        .foregroundStyle(.secondary)
-                    Button("Start") {
-                        guard let minutes = model.customDurationMinutes() else { return }
-                        model.startSelectedMode(minutes: minutes)
+                Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 8) {
+                    GridRow {
+                        Text("For")
+                            .foregroundStyle(.secondary)
+                            .frame(width: 44, alignment: .leading)
+                        HStack(spacing: 8) {
+                            TextField("Minutes", text: Binding(
+                                get: { model.customDurationText },
+                                set: { model.setCustomDurationText($0) }
+                            ))
+                                .textFieldStyle(.roundedBorder)
+                                .frame(width: 86)
+                            Text("min")
+                                .foregroundStyle(.secondary)
+                                .frame(width: 28, alignment: .leading)
+                            Button("Start") {
+                                guard let minutes = model.customDurationMinutes() else { return }
+                                model.startSelectedMode(minutes: minutes)
+                            }
+                            .keyboardShortcut(.return, modifiers: [])
+                            .disabled(model.customDurationMinutes() == nil || model.selectedMode == nil)
+                        }
                     }
-                    .keyboardShortcut(.return, modifiers: [])
-                    .disabled(model.customDurationMinutes() == nil || model.selectedMode == nil)
-                }
-                HStack {
-                    Text("Until")
-                        .foregroundStyle(.secondary)
-                    DatePicker("", selection: Binding(
-                        get: { model.customEndTime },
-                        set: { model.setCustomEndTime($0) }
-                    ), displayedComponents: .hourAndMinute)
-                    .labelsHidden()
+                    GridRow {
+                        Text("Until")
+                            .foregroundStyle(.secondary)
+                            .frame(width: 44, alignment: .leading)
+                        DatePicker("", selection: Binding(
+                            get: { model.customEndTime },
+                            set: { model.setCustomEndTime($0) }
+                        ), displayedComponents: .hourAndMinute)
+                        .labelsHidden()
+                        .frame(width: 146, alignment: .leading)
+                    }
                 }
                 Text(model.customDurationSummaryText)
                     .font(.caption)
@@ -82,6 +92,6 @@ struct MenuBarContentView: View {
             }
         }
         .padding(14)
-        .frame(width: 260)
+        .frame(width: 310)
     }
 }
